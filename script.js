@@ -4,10 +4,18 @@ let applications = [];
 let vacations = [];
 let dismissals = [];
 
+// Налаштування Telegram
+let telegramSettings = {
+    botToken: '7702428410:AAHAMD-N5XMyE6rMBlGyttMWMv1rT6rZJXM',
+    chatId: '-1002989228607',
+    enabled: false
+};
+
 // Ініціалізація при завантаженні сторінки
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
     loadSampleData();
+    loadTelegramSettings();
     updateDashboard();
 });
 
@@ -65,6 +73,9 @@ function showSection(sectionId) {
                 break;
             case 'dashboard':
                 updateDashboard();
+                break;
+            case 'settings':
+                updateTelegramStatus();
                 break;
         }
     }
@@ -534,6 +545,9 @@ function saveEmployee() {
     renderEmployeesTable();
     updateDashboard();
     showNotification('Працівника успішно додано!', 'success');
+    
+    // Відправити в Telegram
+    sendEmployeeToTelegram(newEmployee);
 }
 
 // Зберегти заяву
@@ -563,6 +577,9 @@ function saveApplication() {
     renderApplicationsTable();
     updateDashboard();
     showNotification('Заяву успішно подано!', 'success');
+    
+    // Відправити в Telegram
+    sendApplicationToTelegram(newApplication);
 }
 
 // Зберегти відпустку
@@ -593,6 +610,9 @@ function saveVacation() {
     renderVacationsTable();
     updateDashboard();
     showNotification('Відпустку успішно оформлено!', 'success');
+    
+    // Відправити в Telegram
+    sendVacationToTelegram(newVacation);
 }
 
 // Зберегти звільнення
@@ -621,6 +641,9 @@ function saveDismissal() {
     renderDismissalsTable();
     updateDashboard();
     showNotification('Звільнення успішно оформлено!', 'success');
+    
+    // Відправити в Telegram
+    sendDismissalToTelegram(newDismissal);
 }
 
 // Схваліти заяву
@@ -646,6 +669,9 @@ function approveApplication(id) {
         renderEmployeesTable();
         updateDashboard();
         showNotification('Заяву схвалено! Працівника додано до штату.', 'success');
+        
+        // Відправити в Telegram
+        sendEmployeeToTelegram(newEmployee);
     }
 }
 
@@ -930,3 +956,237 @@ document.addEventListener('keydown', function(e) {
         closeModal();
     }
 });
+
+// ==================== TELEGRAM ФУНКЦІЇ ====================
+
+// Завантажити налаштування Telegram
+function loadTelegramSettings() {
+    const saved = localStorage.getItem('telegramSettings');
+    if (saved) {
+        telegramSettings = JSON.parse(saved);
+        updateTelegramSettingsForm();
+    }
+}
+
+// Зберегти налаштування Telegram
+function saveTelegramSettings() {
+    const botToken = document.getElementById('bot-token').value.trim();
+    const chatId = document.getElementById('chat-id').value.trim();
+    const enabled = document.getElementById('telegram-enabled').checked;
+
+    if (!botToken || !chatId) {
+        showNotification('Будь ласка, заповніть всі обов\'язкові поля', 'error');
+        return;
+    }
+
+    telegramSettings = {
+        botToken: botToken,
+        chatId: chatId,
+        enabled: enabled
+    };
+
+    localStorage.setItem('telegramSettings', JSON.stringify(telegramSettings));
+    showNotification('Налаштування Telegram збережено!', 'success');
+    updateTelegramStatus();
+}
+
+// Оновити форму налаштувань Telegram
+function updateTelegramSettingsForm() {
+    if (document.getElementById('bot-token')) {
+        document.getElementById('bot-token').value = telegramSettings.botToken;
+        document.getElementById('chat-id').value = telegramSettings.chatId;
+        document.getElementById('telegram-enabled').checked = telegramSettings.enabled;
+        updateTelegramStatus();
+    }
+}
+
+// Оновити статус Telegram
+function updateTelegramStatus() {
+    const settingsCard = document.querySelector('.settings-card');
+    if (!settingsCard) return;
+
+    let statusElement = document.getElementById('telegram-status');
+    if (!statusElement) {
+        statusElement = document.createElement('div');
+        statusElement.id = 'telegram-status';
+        settingsCard.insertBefore(statusElement, settingsCard.querySelector('form'));
+    }
+
+    if (telegramSettings.enabled && telegramSettings.botToken && telegramSettings.chatId) {
+        statusElement.className = 'telegram-status connected';
+        statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Telegram підключено та активний';
+    } else {
+        statusElement.className = 'telegram-status disconnected';
+        statusElement.innerHTML = '<i class="fas fa-exclamation-circle"></i> Telegram не налаштовано';
+    }
+}
+
+// Тест з'єднання з Telegram
+async function testTelegramConnection() {
+    const botToken = document.getElementById('bot-token').value.trim();
+    const chatId = document.getElementById('chat-id').value.trim();
+
+    if (!botToken || !chatId) {
+        showNotification('Будь ласка, заповніть Bot Token та Chat ID', 'error');
+        return;
+    }
+
+    const testMessage = `🧪 Тест повідомлення з системи кадрового обліку\n\nЧас: ${new Date().toLocaleString('uk-UA')}\nСтатус: ✅ З\'єднання успішне!`;
+
+    try {
+        await sendTelegramMessage(testMessage, botToken, chatId);
+        showNotification('Тест повідомлення успішно відправлено!', 'success');
+    } catch (error) {
+        showNotification('Помилка відправки: ' + error.message, 'error');
+    }
+}
+
+// Відправити повідомлення в Telegram
+async function sendTelegramMessage(message, botToken = null, chatId = null) {
+    const token = botToken || telegramSettings.botToken;
+    const chat = chatId || telegramSettings.chatId;
+
+    if (!token || !chat || !telegramSettings.enabled) {
+        throw new Error('Telegram не налаштовано');
+    }
+
+    const url = `https://api.telegram.org/bot${token}/sendMessage`;
+    const data = {
+        chat_id: chat,
+        text: message,
+        parse_mode: 'HTML'
+    };
+
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.description || 'Помилка відправки повідомлення');
+    }
+
+    return await response.json();
+}
+
+// Форматувати заяву для Telegram
+function formatApplicationForTelegram(application) {
+    return `📝 <b>НОВА ЗАЯВА НА ПРАЦЕВЛАШТУВАННЯ</b>
+
+👤 <b>ПІБ:</b> ${application.fullName}
+💼 <b>Посада:</b> ${application.position}
+🏢 <b>Відділ:</b> ${application.department}
+📞 <b>Телефон:</b> ${application.phone}
+📧 <b>Email:</b> ${application.email}
+📅 <b>Дата подачі:</b> ${formatDate(application.applicationDate)}
+
+${application.experience ? `💼 <b>Досвід:</b> ${application.experience}` : ''}
+${application.education ? `🎓 <b>Освіта:</b> ${application.education}` : ''}
+
+${application.motivation ? `💬 <b>Мотиваційний лист:</b>\n${application.motivation}` : ''}
+
+🆔 <b>ID заяви:</b> ${application.id}
+⏰ <b>Час:</b> ${new Date().toLocaleString('uk-UA')}`;
+}
+
+// Форматувати відпустку для Telegram
+function formatVacationForTelegram(vacation) {
+    return `🏖️ <b>НОВА ВІДПУСТКА</b>
+
+👤 <b>Працівник:</b> ${vacation.employeeName}
+📋 <b>Тип:</b> ${vacation.type}
+📅 <b>Дата початку:</b> ${formatDate(vacation.startDate)}
+📅 <b>Дата закінчення:</b> ${formatDate(vacation.endDate)}
+📊 <b>Кількість днів:</b> ${vacation.days}
+
+${vacation.reason ? `💬 <b>Причина:</b> ${vacation.reason}` : ''}
+
+🆔 <b>ID відпустки:</b> ${vacation.id}
+⏰ <b>Час:</b> ${new Date().toLocaleString('uk-UA')}`;
+}
+
+// Форматувати звільнення для Telegram
+function formatDismissalForTelegram(dismissal) {
+    return `🚪 <b>НОВЕ ЗВІЛЬНЕННЯ</b>
+
+👤 <b>Працівник:</b> ${dismissal.employeeName}
+📋 <b>Причина:</b> ${dismissal.reason}
+📅 <b>Дата звільнення:</b> ${formatDate(dismissal.dismissalDate)}
+
+${dismissal.notice ? `💬 <b>Примітки:</b> ${dismissal.notice}` : ''}
+
+🆔 <b>ID звільнення:</b> ${dismissal.id}
+⏰ <b>Час:</b> ${new Date().toLocaleString('uk-UA')}`;
+}
+
+// Форматувати додавання працівника для Telegram
+function formatEmployeeForTelegram(employee) {
+    return `👥 <b>НОВИЙ ПРАЦІВНИК</b>
+
+👤 <b>ПІБ:</b> ${employee.fullName}
+💼 <b>Посада:</b> ${employee.position}
+🏢 <b>Відділ:</b> ${employee.department}
+📅 <b>Дата прийому:</b> ${formatDate(employee.hireDate)}
+
+${employee.phone ? `📞 <b>Телефон:</b> ${employee.phone}` : ''}
+${employee.email ? `📧 <b>Email:</b> ${employee.email}` : ''}
+
+🆔 <b>ID працівника:</b> ${employee.id}
+⏰ <b>Час:</b> ${new Date().toLocaleString('uk-UA')}`;
+}
+
+// Відправити заяву в Telegram
+async function sendApplicationToTelegram(application) {
+    if (!telegramSettings.enabled) return;
+
+    try {
+        const message = formatApplicationForTelegram(application);
+        await sendTelegramMessage(message);
+    } catch (error) {
+        console.error('Помилка відправки заяви в Telegram:', error);
+        showNotification('Не вдалося відправити заяву в Telegram', 'warning');
+    }
+}
+
+// Відправити відпустку в Telegram
+async function sendVacationToTelegram(vacation) {
+    if (!telegramSettings.enabled) return;
+
+    try {
+        const message = formatVacationForTelegram(vacation);
+        await sendTelegramMessage(message);
+    } catch (error) {
+        console.error('Помилка відправки відпустки в Telegram:', error);
+        showNotification('Не вдалося відправити відпустку в Telegram', 'warning');
+    }
+}
+
+// Відправити звільнення в Telegram
+async function sendDismissalToTelegram(dismissal) {
+    if (!telegramSettings.enabled) return;
+
+    try {
+        const message = formatDismissalForTelegram(dismissal);
+        await sendTelegramMessage(message);
+    } catch (error) {
+        console.error('Помилка відправки звільнення в Telegram:', error);
+        showNotification('Не вдалося відправити звільнення в Telegram', 'warning');
+    }
+}
+
+// Відправити працівника в Telegram
+async function sendEmployeeToTelegram(employee) {
+    if (!telegramSettings.enabled) return;
+
+    try {
+        const message = formatEmployeeForTelegram(employee);
+        await sendTelegramMessage(message);
+    } catch (error) {
+        console.error('Помилка відправки працівника в Telegram:', error);
+        showNotification('Не вдалося відправити дані працівника в Telegram', 'warning');
+    }
+}

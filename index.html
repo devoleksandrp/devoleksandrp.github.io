@@ -27,6 +27,9 @@
                 <a href="#dismissals" class="nav-link" data-section="dismissals">
                     <i class="fas fa-user-times"></i> Звільнення
                 </a>
+                <a href="#settings" class="nav-link" data-section="settings">
+                    <i class="fas fa-cog"></i> Налаштування
+                </a>
             </nav>
         </div>
     </header>
@@ -186,6 +189,80 @@
                         <tbody id="dismissals-tbody">
                         </tbody>
                     </table>
+                </div>
+            </section>
+
+            <!-- Налаштування -->
+            <section id="settings" class="section">
+                <h2>Налаштування Telegram</h2>
+                <div class="settings-container">
+                    <div class="settings-card">
+                        <h3><i class="fas fa-paper-plane"></i> Налаштування Telegram Bot</h3>
+                        <p>Налаштуйте відправку заявок у Telegram для отримання миттєвих сповіщень</p>
+                        
+                        <form id="telegram-settings-form">
+                            <div class="form-group">
+                                <label for="bot-token">Bot Token *</label>
+                                <input type="text" id="bot-token" placeholder="1234567890:ABCdefGHIjklMNOpqrsTUVwxyz" required>
+                                <small>Отримайте токен у @BotFather в Telegram</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="chat-id">Chat ID *</label>
+                                <input type="text" id="chat-id" placeholder="123456789" required>
+                                <small>ID чату або каналу для отримання повідомлень</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="telegram-enabled">Увімкнути відправку в Telegram</label>
+                                <input type="checkbox" id="telegram-enabled" checked>
+                            </div>
+                            
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-primary" onclick="saveTelegramSettings()">
+                                    <i class="fas fa-save"></i> Зберегти налаштування
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="testTelegramConnection()">
+                                    <i class="fas fa-paper-plane"></i> Тест відправки
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="settings-card">
+                        <h3><i class="fas fa-info-circle"></i> Інструкція</h3>
+                        <div class="instruction-steps">
+                            <div class="step">
+                                <span class="step-number">1</span>
+                                <div class="step-content">
+                                    <h4>Створіть Telegram Bot</h4>
+                                    <p>Напишіть @BotFather в Telegram та створіть нового бота командою /newbot</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">2</span>
+                                <div class="step-content">
+                                    <h4>Отримайте Bot Token</h4>
+                                    <p>Скопіюйте токен бота та вставте його в поле "Bot Token"</p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">3</span>
+                                <div class="step-content">
+                                    <h4>Отримайте Chat ID</h4>
+                                    <p>Напишіть боту повідомлення, потім перейдіть за посиланням:<br>
+                                    <code>https://api.telegram.org/bot[YOUR_BOT_TOKEN]/getUpdates</code></p>
+                                </div>
+                            </div>
+                            <div class="step">
+                                <span class="step-number">4</span>
+                                <div class="step-content">
+                                    <h4>Налаштуйте систему</h4>
+                                    <p>Вставте Chat ID та збережіть налаштування. Натисніть "Тест відправки" для перевірки</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
         </div>

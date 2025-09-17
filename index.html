@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Автоматизована система кадрового обліку</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1><i class="fas fa-users"></i> Система кадрового обліку</h1>
+            <nav class="nav">
+                <a href="#dashboard" class="nav-link active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i> Головна
+                </a>
+                <a href="#employees" class="nav-link" data-section="employees">
+                    <i class="fas fa-user-tie"></i> Працівники
+                </a>
+                <a href="#applications" class="nav-link" data-section="applications">
+                    <i class="fas fa-file-alt"></i> Заяви
+                </a>
+                <a href="#vacations" class="nav-link" data-section="vacations">
+                    <i class="fas fa-calendar-alt"></i> Відпустки
+                </a>
+                <a href="#dismissals" class="nav-link" data-section="dismissals">
+                    <i class="fas fa-user-times"></i> Звільнення
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Головна панель -->
+            <section id="dashboard" class="section active">
+                <h2>Головна панель</h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <h3 id="total-employees">0</h3>
+                        <p>Всього працівників</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-file-alt"></i>
+                        <h3 id="pending-applications">0</h3>
+                        <p>Заяв на розгляді</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-calendar-check"></i>
+                        <h3 id="active-vacations">0</h3>
+                        <p>Активних відпусток</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3 id="pending-dismissals">0</h3>
+                        <p>Звільнень на розгляді</p>
+                    </div>
+                </div>
+                
+                <div class="quick-actions">
+                    <h3>Швидкі дії</h3>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="showSection('applications')">
+                            <i class="fas fa-plus"></i> Нова заява на працевлаштування
+                        </button>
+                        <button class="btn btn-success" onclick="showSection('vacations')">
+                            <i class="fas fa-calendar-plus"></i> Оформити відпустку
+                        </button>
+                        <button class="btn btn-warning" onclick="showSection('dismissals')">
+                            <i class="fas fa-user-times"></i> Звільнення працівника
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Працівники -->
+            <section id="employees" class="section">
+                <h2>Облік працівників</h2>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showAddEmployeeForm()">
+                        <i class="fas fa-plus"></i> Додати працівника
+                    </button>
+                    <div class="search-box">
+                        <input type="text" id="employee-search" placeholder="Пошук працівників...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="employees-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ПІБ</th>
+                                <th>Посада</th>
+                                <th>Відділ</th>
+                                <th>Дата прийому</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="employees-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Заяви на працевлаштування -->
+            <section id="applications" class="section">
+                <h2>Заяви на працевлаштування</h2>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showApplicationForm()">
+                        <i class="fas fa-plus"></i> Подати заяву
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="applications-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ПІБ</th>
+                                <th>Посада</th>
+                                <th>Дата подачі</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applications-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Відпустки -->
+            <section id="vacations" class="section">
+                <h2>Облік відпусток</h2>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showVacationForm()">
+                        <i class="fas fa-plus"></i> Оформити відпустку
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="vacations-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Працівник</th>
+                                <th>Тип відпустки</th>
+                                <th>Дата початку</th>
+                                <th>Дата закінчення</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vacations-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Звільнення -->
+            <section id="dismissals" class="section">
+                <h2>Облік звільнень</h2>
+                <div class="section-header">
+                    <button class="btn btn-primary" onclick="showDismissalForm()">
+                        <i class="fas fa-plus"></i> Оформити звільнення
+                    </button>
+                </div>
+                
+                <div class="table-container">
+                    <table class="data-table" id="dismissals-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Працівник</th>
+                                <th>Причина</th>
+                                <th>Дата звільнення</th>
+                                <th>Статус</th>
+                                <th>Дії</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dismissals-tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Модальні вікна -->
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Заголовок</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Контент модального вікна -->
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
